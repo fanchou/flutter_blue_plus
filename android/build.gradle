@@ -14,6 +14,4 @@ android {
     defaultConfig {
         minSdkVersion 21
     }
-
-    namespace 'com.boskokg.flutter_blue_plus'
 }
