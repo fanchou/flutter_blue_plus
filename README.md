@@ -352,7 +352,7 @@ For location permissions on iOS see more at: [https://developer.apple.com/docume
 | readRssi                  | :white_check_mark: | :white_check_mark: | :fire: | Read RSSI from a connected device                          |
 | requestMtu                | :white_check_mark: |                    | :fire: | Request to change the MTU for the device                   |
 | requestConnectionPriority | :white_check_mark: |                    | :fire: | Request to update a high priority, low latency connection  |
-| pair                      | :white_check_mark: |                    | :fire: | Calls createBond on a device                               |
+| createBond                | :white_check_mark: |                    | :fire: | Force a system pairing dialogue to show, if needed         |
 | removeBond                | :white_check_mark: |                    | :fire: | Remove Bluetooth Bond of device                            |
 | setPreferredPhy           | :white_check_mark: |                    |        | Set preferred RX and TX phy for connection and phy options |
 | clearGattCache            | :white_check_mark: |                    | :fire: | Clear android cache of service discovery results           |
@@ -446,6 +446,30 @@ for (var d in system) {
 Search the App Store for a BLE scanner apps. 
 
 You should check if they can discover your device.
+
+---
+
+### Connection fails
+
+**1. Your ble device may be low battery**
+
+Bluetooth can become erratic when your peripheral device is low battery.
+
+**2. Your ble device may have refused the connection or have a bug**
+
+Connection is a two-way process. Your ble device may be misconfigured.
+
+**3. You may be on the edge of the Bluetooth range.**
+
+The signal is too weak, or there are a lot of devices causing radio interference.
+
+**4. Some phones have an issue connecting while scanning.**
+
+The Huawei P8 Lite is one of the reported phones to have this issue. Try stopping your scanner before connecting.
+
+**5. Try restarting your phone**
+
+Bluetooth is a complicated system service, and can enter a bad state.
 
 ---
 

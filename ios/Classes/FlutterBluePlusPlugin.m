@@ -1,4 +1,4 @@
-// Copyright 2017, Paul DeMarco.
+// Copyright 2023, Charles Weinberger & Paul DeMarco.
 // All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
@@ -222,6 +222,18 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
             // already connected?
             if ([self isConnectedToThisApp:remoteId]) {
+
+                // See BmConnectionStateResponse
+                NSDictionary *response = @{
+                    @"remote_id":                remoteId,
+                    @"connection_state":         @([self bmConnectionStateEnum:CBPeripheralStateConnected]),
+                    @"disconnect_reason_code":   [NSNull null],
+                    @"disconnect_reason_string": [NSNull null],
+                };
+
+                // the dart code always waits for this callback
+                [_methodChannel invokeMethod:@"OnConnectionStateChanged" arguments:response];
+
                 result(@(true)); // no work to do
                 return;
             }
@@ -272,6 +284,18 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             // already disconnected?
             CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
             if (peripheral == nil) {
+
+                // See BmConnectionStateResponse
+                NSDictionary *response = @{
+                    @"remote_id":                remoteId,
+                    @"connection_state":         @([self bmConnectionStateEnum:CBPeripheralStateConnected]),
+                    @"disconnect_reason_code":   @(0),
+                    @"disconnect_reason_string": @"Already Disconnected",
+                };
+
+                // the dart code always waits for this callback
+                [_methodChannel invokeMethod:@"OnConnectionStateChanged" arguments:response];
+                
                 result(@(true)); // no work to do
                 return;
             }
@@ -279,25 +303,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             [_centralManager cancelPeripheralConnection:peripheral];
             
             result(@(true));
-        }
-        else if ([@"getConnectionState" isEqualToString:call.method])
-        {
-            // remoteId is passed raw, not in a NSDictionary
-            NSString *remoteId = [call arguments];
-
-            // get the connection state of *our app*
-            // We don't care if other apps are connected
-            CBPeripheralState connectionState = [self isConnectedToThisApp:remoteId] ?
-                CBPeripheralStateConnected :
-                CBPeripheralStateDisconnected;
-
-            // See BmConnectionStateResponse
-            NSDictionary* response = @{
-                @"remote_id":        remoteId,
-                @"connection_state": @([self bmConnectionStateEnum:connectionState]),
-            };
-
-            result(response);
         }
         else if ([@"discoverServices" isEqualToString:call.method])
         {
@@ -547,31 +552,6 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             [peripheral setNotifyValue:[enable boolValue] forCharacteristic:characteristic];
             
             result(@(true));
-        }
-        else if ([@"getMtu" isEqualToString:call.method])
-        {
-            // remoteId is passed raw, not in a NSDictionary
-            NSString *remoteId = [call arguments];
-
-            // get peripheral
-            CBPeripheral *peripheral = [self getConnectedPeripheral:remoteId];
-            if (peripheral == nil) {
-                NSString* s = @"device is not connected. have you called connect()?";
-                result([FlutterError errorWithCode:@"mtu" message:s details:remoteId]);
-                return;
-            }
-
-            // get mtu
-            uint32_t mtu = [self getMtu:peripheral];
-
-            // See: BmMtuChangedResponse
-            NSDictionary* response = @{
-                @"remote_id" : [[peripheral identifier] UUIDString],
-                @"mtu" : @(mtu),
-                @"success" : @(1),
-            };
-            
-            result(response);
         }
         else if ([@"requestMtu" isEqualToString:call.method])
         {
@@ -838,8 +818,10 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     // See BmConnectionStateResponse
     NSDictionary *result = @{
-        @"remote_id":        remoteId,
-        @"connection_state": @([self bmConnectionStateEnum:peripheral.state]),
+        @"remote_id":                remoteId,
+        @"connection_state":         @([self bmConnectionStateEnum:peripheral.state]),
+        @"disconnect_reason_code":   [NSNull null],
+        @"disconnect_reason_string": [NSNull null],
     };
 
     // Send connection state
@@ -867,8 +849,10 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     // See BmConnectionStateResponse
     NSDictionary *result = @{
-        @"remote_id":        remoteId,
-        @"connection_state": @([self bmConnectionStateEnum:peripheral.state]),
+        @"remote_id":                remoteId,
+        @"connection_state":         @([self bmConnectionStateEnum:peripheral.state]),
+        @"disconnect_reason_code":   error ? [error localizedDescription] : [NSNull null],
+        @"disconnect_reason_string": error ? @(error.code) : [NSNull null],
     };
 
     // Send connection state
@@ -888,8 +872,10 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     // See BmConnectionStateResponse
     NSDictionary *result = @{
-        @"remote_id":        [[peripheral identifier] UUIDString],
-        @"connection_state": @([self bmConnectionStateEnum:peripheral.state]),
+        @"remote_id":                [[peripheral identifier] UUIDString],
+        @"connection_state":         @([self bmConnectionStateEnum:peripheral.state]),
+        @"disconnect_reason_code":   error ? [error localizedDescription] : [NSNull null],
+        @"disconnect_reason_string": error ? @(error.code) : [NSNull null],
     };
 
     // Send connection state

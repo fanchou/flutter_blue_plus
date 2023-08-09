@@ -1,3 +1,31 @@
+## 1.13.4
+* Android: fix: discoverServices never returns (regression in 1.13.0)
+* Android: fix: turnOn & turnOff must check for permissions
+* Android: fix: startScan should not required BLUETOOTH_CONNECT permission
+
+## 1.13.3
+* Dart: be extra careful to only call connect & disconnect when necessary
+
+## 1.13.2
+* Dart: fix: connect should be no-op if already connected (Regression in 1.13.1)
+* Dart: BluetoothDevice: use mutexes to prevent multiple in flight requests
+
+## 1.13.1
+* Android/iOS: fix: on connection failure, return right away
+* Android/iOS: improve: on connection failure, return error code and error string
+
+## 1.13.0
+This release focuses on improving bonding support.
+* Android: fix: discoverServices & others can fail if currently in the process of bonding
+* Android: createBond: check for success and throw exception on failure
+* Android: removeBond: return Future<void> instead of Future<Bool>, and throw exception on failure
+
+## 1.12.14
+* Android: fix: min sdk is currently 21, not 19
+* Android: fix: getOrDefault not available in AndroidSdkLevel < 24
+* Android: log: BOND changes
+* Android: rename: pair -> createBond
+
 ## 1.12.13
 * iOS: fix: FlutterBluePlus.isAvailable 'int' is not a subtype of type 'FutureOr<bool>' (regressed in 1.12.10)
 

@@ -669,23 +669,22 @@ enum BmConnectionStateEnum {
 class BmConnectionStateResponse {
   final String remoteId;
   final BmConnectionStateEnum connectionState;
+  final int? disconnectReasonCode;
+  final String? disconnectReasonString;
 
   BmConnectionStateResponse({
     required this.remoteId,
     required this.connectionState,
+    required this.disconnectReasonCode,
+    required this.disconnectReasonString,
   });
-
-  Map<dynamic, dynamic> toMap() {
-    final Map<dynamic, dynamic> data = {};
-    data['remote_id'] = remoteId;
-    data['connection_state'] = connectionState.index;
-    return data;
-  }
 
   factory BmConnectionStateResponse.fromMap(Map<dynamic, dynamic> json) {
     return BmConnectionStateResponse(
       remoteId: json['remote_id'],
       connectionState: BmConnectionStateEnum.values[json['connection_state'] as int],
+      disconnectReasonCode: json['disconnect_reason_code'],
+      disconnectReasonString: json['disconnect_reason_string'],
     );
   }
 }
@@ -771,9 +770,15 @@ class BmReadRssiResult {
   }
 }
 
+enum BmConnectionPriorityEnum{
+  balanced, // 0 
+  high, // 1
+  lowPower, // 2
+}
+
 class BmConnectionPriorityRequest {
   final String remoteId;
-  final int connectionPriority;
+  final BmConnectionPriorityEnum connectionPriority;
 
   BmConnectionPriorityRequest({
     required this.remoteId,
@@ -783,7 +788,7 @@ class BmConnectionPriorityRequest {
   Map<dynamic, dynamic> toMap() {
     final Map<dynamic, dynamic> data = {};
     data['remote_id'] = remoteId;
-    data['connection_priority'] = connectionPriority;
+    data['connection_priority'] = connectionPriority.index;
     return data;
   }
 }
@@ -816,6 +821,32 @@ class BmPreferredPhy {
       txPhy: json['tx_phy'],
       rxPhy: json['rx_phy'],
       phyOptions: json['phy_options'],
+    );
+  }
+}
+
+
+enum BmBondStateEnum {
+  none, // 0
+  bonding, // 1
+  bonded, // 2
+  failed, // 3
+  lost, // 4
+}
+
+class BmBondStateResponse {
+  final String remoteId;
+  final BmBondStateEnum bondState;
+
+  BmBondStateResponse({
+    required this.remoteId,
+    required this.bondState,
+  });
+
+  factory BmBondStateResponse.fromMap(Map<dynamic, dynamic> json) {
+    return BmBondStateResponse(
+      remoteId: json['remote_id'],
+      bondState: BmBondStateEnum.values[json['bond_state']],
     );
   }
 }
